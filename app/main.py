@@ -12,6 +12,7 @@ from app.db.session import engine
 from app.db import base
 from app.core.admin_middleware import admin_auth_middleware
 from app.db.seeders.seed_admin import seed_admin
+from sqlalchemy import create_engine, text
 
 base.Base.metadata.create_all(bind=engine)
 seed_admin()
@@ -84,3 +85,9 @@ def custom_openapi():
 
 
 app.openapi = custom_openapi
+
+@app.get("/")
+def read_root():
+    with engine.connect() as conn:
+        version = conn.execute(text("SELECT VERSION()")).scalar_one()
+        return {"message": "Connected to DB", "mysql_version": version}
